@@ -6,6 +6,9 @@
   "categories": [
     "Other"
   ],
+  "repository": {
+    "url": "https://github.com/symsmith/dtcg-autocomplete"
+  },
   "publisher": "symsmith",
   "main": "./dist/extension.js",
   "scripts": {
@@ -17,7 +20,8 @@
     "lint:fix": "oxlint --fix",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
-    "publish": "vsce publish"
+    "check": "pnpm fmt:check && pnpm lint",
+    "publish": "pnpm check && pnpm build && vsce publish"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
