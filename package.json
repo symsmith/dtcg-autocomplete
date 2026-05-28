@@ -1,7 +1,7 @@
 {
   "name": "dtcg-autocomplete",
   "displayName": "DTCG Autocomplete",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "CSS variable autocomplete and hover for DTCG design token files",
   "categories": [
     "Other"
@@ -10,6 +10,11 @@
     "url": "https://github.com/symsmith/dtcg-autocomplete"
   },
   "publisher": "symsmith",
+  "files": [
+    "dist",
+    "LICENSE.md",
+    "assets"
+  ],
   "main": "./dist/extension.js",
   "scripts": {
     "build": "rolldown -c rolldown.config.ts",
@@ -64,6 +69,7 @@
   "activationEvents": [
     "onStartupFinished"
   ],
+  "icon": "assets/icon.png",
   "engines": {
     "vscode": "^1.85.0"
   }
