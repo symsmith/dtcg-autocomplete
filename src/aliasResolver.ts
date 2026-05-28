@@ -2,44 +2,30 @@ import type { ParsedToken } from "./tokenParser";
 
 const ALIAS_RE = /^\{(.+)\}$/;
 
-export function resolveValue(
-	value: string,
-	byDotPath: Map<string, ParsedToken>,
-	depth = 0,
-	maxDepth = 10,
-): string {
-	if (depth >= maxDepth) return value;
-	const match = ALIAS_RE.exec(value);
-	if (!match) return value;
-	const token = byDotPath.get(match[1]);
-	if (!token) return value;
-	return resolveValue(token.rawValue, byDotPath, depth + 1, maxDepth);
+export interface AliasResult {
+	resolvedValue: string;
+	chain: string[];
+	terminal: ParsedToken | undefined;
 }
 
-export function resolveTerminalToken(
-	token: ParsedToken,
-	byDotPath: Map<string, ParsedToken>,
-	depth = 0,
-	maxDepth = 10,
-): ParsedToken {
-	if (depth >= maxDepth) return token;
-	const match = ALIAS_RE.exec(token.rawValue);
-	if (!match) return token;
-	const next = byDotPath.get(match[1]);
-	if (!next) return token;
-	return resolveTerminalToken(next, byDotPath, depth + 1, maxDepth);
-}
-
-export function resolveChain(
+export function resolveAlias(
 	value: string,
 	byDotPath: Map<string, ParsedToken>,
-	depth = 0,
 	maxDepth = 10,
-): string[] {
-	if (depth >= maxDepth) return [value];
-	const match = ALIAS_RE.exec(value);
-	if (!match) return [value];
-	const token = byDotPath.get(match[1]);
-	if (!token) return [value];
-	return [value, ...resolveChain(token.rawValue, byDotPath, depth + 1, maxDepth)];
+): AliasResult {
+	const chain: string[] = [value];
+	let current = value;
+	let terminal: ParsedToken | undefined;
+
+	for (let depth = 0; depth < maxDepth; depth++) {
+		const match = ALIAS_RE.exec(current);
+		if (!match) break;
+		const token = byDotPath.get(match[1]);
+		if (!token) break;
+		terminal = token;
+		current = token.rawValue;
+		chain.push(current);
+	}
+
+	return { resolvedValue: current, chain, terminal };
 }

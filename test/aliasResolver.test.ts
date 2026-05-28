@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveChain, resolveValue } from "../src/aliasResolver";
+import { resolveAlias } from "../src/aliasResolver";
 import type { ParsedToken } from "../src/tokenParser";
 
 function makeMap(entries: Record<string, string>): Map<string, ParsedToken> {
@@ -16,14 +16,20 @@ function makeMap(entries: Record<string, string>): Map<string, ParsedToken> {
 	);
 }
 
-describe("resolveValue", () => {
-	it("passes through non-alias values", () => {
-		expect(resolveValue("#ff0000", new Map())).toBe("#ff0000");
+describe("resolveAlias", () => {
+	it("passes through a non-alias value", () => {
+		const result = resolveAlias("#ff0000", new Map());
+		expect(result.resolvedValue).toBe("#ff0000");
+		expect(result.chain).toEqual(["#ff0000"]);
+		expect(result.terminal).toBeUndefined();
 	});
 
 	it("resolves a direct alias", () => {
 		const map = makeMap({ "color.red": "#ff0000" });
-		expect(resolveValue("{color.red}", map)).toBe("#ff0000");
+		const result = resolveAlias("{color.red}", map);
+		expect(result.resolvedValue).toBe("#ff0000");
+		expect(result.chain).toEqual(["{color.red}", "#ff0000"]);
+		expect(result.terminal?.dotPath).toBe("color.red");
 	});
 
 	it("resolves a two-hop alias chain", () => {
@@ -31,43 +37,58 @@ describe("resolveValue", () => {
 			"color.base": "#ff0000",
 			"color.alias": "{color.base}",
 		});
-		expect(resolveValue("{color.alias}", map)).toBe("#ff0000");
+		const result = resolveAlias("{color.alias}", map);
+		expect(result.resolvedValue).toBe("#ff0000");
+		expect(result.chain).toEqual(["{color.alias}", "{color.base}", "#ff0000"]);
+		expect(result.terminal?.dotPath).toBe("color.base");
 	});
 
 	it("resolves a three-hop alias chain", () => {
-		const map = makeMap({
-			a: "#fff",
-			b: "{a}",
-			c: "{b}",
-		});
-		expect(resolveValue("{c}", map)).toBe("#fff");
+		const map = makeMap({ a: "#fff", b: "{a}", c: "{b}" });
+		const result = resolveAlias("{c}", map);
+		expect(result.resolvedValue).toBe("#fff");
+		expect(result.chain).toEqual(["{c}", "{b}", "{a}", "#fff"]);
 	});
 
 	it("returns raw value when alias target is missing", () => {
-		expect(resolveValue("{does.not.exist}", new Map())).toBe("{does.not.exist}");
+		const result = resolveAlias("{does.not.exist}", new Map());
+		expect(result.resolvedValue).toBe("{does.not.exist}");
+		expect(result.chain).toEqual(["{does.not.exist}"]);
+		expect(result.terminal).toBeUndefined();
 	});
 
-	it("returns raw value on circular reference (max depth exceeded)", () => {
-		const map = makeMap({
-			a: "{b}",
-			b: "{a}",
-		});
-		const result = resolveValue("{a}", map);
-		expect(result).toMatch(/^\{/);
-	});
-
-	it("returns single-item chain for direct value", () => {
-		expect(resolveChain("#ff0000", new Map())).toEqual(["#ff0000"]);
-	});
-
-	it("returns full chain for multi-hop alias", () => {
-		const map = makeMap({ a: "{b}", b: "{c}", c: "#000" });
-		expect(resolveChain("{a}", map)).toEqual(["{a}", "{b}", "{c}", "#000"]);
+	it("caps at max depth on circular reference", () => {
+		const map = makeMap({ a: "{b}", b: "{a}" });
+		const result = resolveAlias("{a}", map);
+		expect(result.resolvedValue).toMatch(/^\{/);
+		expect(result.chain.length).toBe(11); // initial + 10 iterations
 	});
 
 	it("respects custom maxDepth", () => {
 		const map = makeMap({ a: "{b}", b: "{c}", c: "#000" });
-		expect(resolveValue("{a}", map, 0, 1)).toBe("{b}");
-		expect(resolveValue("{a}", map, 0, 3)).toBe("#000");
+		expect(resolveAlias("{a}", map, 1).resolvedValue).toBe("{b}");
+		expect(resolveAlias("{a}", map, 3).resolvedValue).toBe("#000");
+	});
+
+	it("propagates terminal swatchColor", () => {
+		const leaf: ParsedToken = {
+			dotPath: "color.red",
+			cssVar: "--color-red",
+			type: "color",
+			rawValue: "#ff0000",
+			swatchColor: "#ff0000",
+		};
+		const alias: ParsedToken = {
+			dotPath: "color.primary",
+			cssVar: "--color-primary",
+			type: "color",
+			rawValue: "{color.red}",
+		};
+		const map = new Map([
+			["color.red", leaf],
+			["color.primary", alias],
+		]);
+		const result = resolveAlias("{color.primary}", map);
+		expect(result.terminal?.swatchColor).toBe("#ff0000");
 	});
 });

@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { parseTokenFile, type ParsedToken } from "./tokenParser";
-import { resolveChain, resolveTerminalToken } from "./aliasResolver";
+import { resolveAlias } from "./aliasResolver";
 
 export interface ResolvedToken extends ParsedToken {
 	resolvedValue: string;
@@ -31,13 +31,12 @@ export async function buildIndex(filePaths: string[]): Promise<TokenIndex> {
 	const byDotPath = new Map<string, ResolvedToken>();
 
 	for (const [dotPath, token] of merged) {
-		const chain = resolveChain(token.rawValue, merged);
-		const terminal = resolveTerminalToken(token, merged);
+		const { resolvedValue, chain, terminal } = resolveAlias(token.rawValue, merged);
 		const resolved: ResolvedToken = {
 			...token,
-			resolvedValue: chain[chain.length - 1],
+			resolvedValue,
 			aliasChain: chain,
-			swatchColor: token.swatchColor ?? terminal.swatchColor,
+			swatchColor: token.swatchColor ?? terminal?.swatchColor,
 		};
 		byCssVar.set(token.cssVar, resolved);
 		byDotPath.set(dotPath, resolved);
