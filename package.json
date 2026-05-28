@@ -1,76 +1,78 @@
 {
-  "name": "dtcg-autocomplete",
-  "displayName": "DTCG Autocomplete",
-  "version": "1.1.1",
-  "description": "CSS variable autocomplete and hover for DTCG design token files",
-  "categories": [
-    "Other"
-  ],
-  "repository": {
-    "url": "https://github.com/symsmith/dtcg-autocomplete"
-  },
-  "publisher": "symsmith",
-  "files": [
-    "dist",
-    "LICENSE.md",
-    "assets"
-  ],
-  "main": "./dist/extension.js",
-  "scripts": {
-    "build": "rolldown -c rolldown.config.ts",
-    "watch": "rolldown -c rolldown.config.ts --watch",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "lint": "oxlint",
-    "lint:fix": "oxlint --fix",
-    "fmt": "oxfmt",
-    "fmt:check": "oxfmt --check",
-    "check": "pnpm fmt:check && pnpm lint",
-    "publish": "pnpm check && pnpm test && pnpm build && vsce publish"
-  },
-  "devDependencies": {
-    "@types/node": "^22.0.0",
-    "@types/vscode": "^1.85.0",
-    "@vscode/vsce": "^3.9.1",
-    "oxfmt": "^0.52.0",
-    "oxlint": "^1.67.0",
-    "rolldown": "^1.0.0",
-    "typescript": "^5.7.0",
-    "vitest": "^3.0.0"
-  },
-  "contributes": {
-    "configuration": {
-      "title": "DTCG Autocomplete",
-      "properties": {
-        "dtcg-autocomplete.tokenGlob": {
-          "type": "string",
-          "default": "**/tokens/**/*.json",
-          "description": "Glob pattern to find DTCG token JSON files"
-        },
-        "dtcg-autocomplete.excludeGlob": {
-          "type": "string",
-          "default": "",
-          "description": "Glob pattern to exclude from the token index (e.g. **/node_modules)"
-        },
-        "dtcg-autocomplete.resolverGlob": {
-          "type": "string",
-          "default": "**/*.resolver.json",
-          "description": "Glob pattern to find DTCG resolver files"
-        }
-      }
-    },
-    "commands": [
-      {
-        "command": "dtcg-autocomplete.reloadIndex",
-        "title": "DTCG: Reload Token Index"
-      }
-    ]
-  },
-  "activationEvents": [
-    "onStartupFinished"
-  ],
-  "icon": "assets/icon.png",
-  "engines": {
-    "vscode": "^1.85.0"
-  }
+	"name": "dtcg-autocomplete",
+	"displayName": "DTCG Autocomplete",
+	"version": "1.1.1",
+	"description": "CSS variable autocomplete and hover for DTCG design token files",
+	"categories": [
+		"Other"
+	],
+	"repository": {
+		"url": "https://github.com/symsmith/dtcg-autocomplete"
+	},
+	"publisher": "symsmith",
+	"files": [
+		"dist",
+		"LICENSE.md",
+		"assets"
+	],
+	"main": "./dist/extension.js",
+	"scripts": {
+		"build": "rolldown -c rolldown.config.ts",
+		"watch": "rolldown -c rolldown.config.ts --watch",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"ts": "tsgo --noEmit",
+		"lint": "oxlint",
+		"lint:fix": "oxlint --fix",
+		"fmt": "oxfmt",
+		"fmt:check": "oxfmt --check",
+		"check": "pnpm fmt:check && pnpm lint && pnpm ts",
+		"publish": "pnpm check && pnpm test && pnpm build && vsce publish"
+	},
+	"devDependencies": {
+		"@types/node": "^22.0.0",
+		"@types/vscode": "^1.85.0",
+		"@typescript/native-preview": "7.0.0-dev.20260527.2",
+		"@vscode/vsce": "^3.9.1",
+		"oxfmt": "^0.52.0",
+		"oxlint": "^1.67.0",
+		"rolldown": "^1.0.0",
+		"typescript": "^5.7.0",
+		"vitest": "^3.0.0"
+	},
+	"contributes": {
+		"configuration": {
+			"title": "DTCG Autocomplete",
+			"properties": {
+				"dtcg-autocomplete.tokenGlob": {
+					"type": "string",
+					"default": "**/tokens/**/*.json",
+					"description": "Glob pattern to find DTCG token JSON files"
+				},
+				"dtcg-autocomplete.excludeGlob": {
+					"type": "string",
+					"default": "",
+					"description": "Glob pattern to exclude from the token index (e.g. **/node_modules)"
+				},
+				"dtcg-autocomplete.resolverGlob": {
+					"type": "string",
+					"default": "**/*.resolver.json",
+					"description": "Glob pattern to find DTCG resolver files"
+				}
+			}
+		},
+		"commands": [
+			{
+				"command": "dtcg-autocomplete.reloadIndex",
+				"title": "DTCG: Reload Token Index"
+			}
+		]
+	},
+	"activationEvents": [
+		"onStartupFinished"
+	],
+	"icon": "assets/icon.png",
+	"engines": {
+		"vscode": "^1.85.0"
+	}
 }

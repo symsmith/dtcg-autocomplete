@@ -1,6 +1,7 @@
 {
-  "editor.defaultFormatter": "oxc.oxc-vscode",
-  "oxc.enable": true,
-  "prettier.enable": false,
-  "eslint.enable": false
+	"editor.defaultFormatter": "oxc.oxc-vscode",
+	"oxc.enable": true,
+	"prettier.enable": false,
+	"eslint.enable": false,
+	"js/ts.experimental.useTsgo": true
 }
