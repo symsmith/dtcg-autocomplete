@@ -1,7 +1,7 @@
 {
   "name": "dtcg-autocomplete",
   "displayName": "DTCG Autocomplete",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "CSS variable autocomplete and hover for DTCG design token files",
   "categories": [
     "Other"
@@ -21,7 +21,7 @@
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
     "check": "pnpm fmt:check && pnpm lint",
-    "publish": "pnpm check && pnpm build && vsce publish"
+    "publish": "pnpm check && pnpm test && pnpm build && vsce publish"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

@@ -1,8 +1,9 @@
 import * as vscode from "vscode";
-import { buildIndex, type TokenIndex } from "./tokenIndex";
+import { DtcgColorProvider } from "./colorProvider";
 import { DtcgCompletionProvider } from "./completionProvider";
 import { DtcgHoverProvider } from "./hoverProvider";
 import { getVariantExclusions } from "./resolverParser";
+import { buildIndex, type TokenIndex } from "./tokenIndex";
 
 const LANGUAGES = [
   "css",
@@ -56,6 +57,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       "-",
     ),
     vscode.languages.registerHoverProvider(selectors, new DtcgHoverProvider(getIndex)),
+    vscode.languages.registerColorProvider(selectors, new DtcgColorProvider(getIndex)),
     vscode.commands.registerCommand("dtcg-autocomplete.reloadIndex", rebuild),
   );
 
