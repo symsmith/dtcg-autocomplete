@@ -1,12 +1,21 @@
 type JsonObject = { [key: string]: unknown };
 
+type ShadowObject = {
+	offsetX: unknown;
+	offsetY: unknown;
+	blur: unknown;
+	spread: unknown;
+	color: unknown;
+	inset?: unknown;
+};
+
 export function formatTokenValue(value: unknown): string {
 	if (typeof value === "string") return value;
 	if (typeof value === "number") return String(value);
 	if (Array.isArray(value)) {
 		if (isCubicBezier(value)) return `cubic-bezier(${value.join(", ")})`;
 		if (value.length > 0 && isShadowObject(value[0])) {
-			return value.map((s) => formatShadow(s as JsonObject)).join(", ");
+			return value.map((s) => formatShadow(s as ShadowObject)).join(", ");
 		}
 		return JSON.stringify(value);
 	}
@@ -23,20 +32,18 @@ function formatObject(v: JsonObject): string {
 	}
 	if (isShadowObject(v)) return formatShadow(v);
 	if (isBorder(v)) {
-		const b = v as { width: unknown; style: string; color: string };
-		return `${formatDim(b.width)} ${b.style} ${b.color}`;
+		return `${formatDim(v.width)} ${v.style} ${v.color}`;
 	}
 	if (isTransition(v)) {
-		const t = v as { duration: unknown; timingFunction: string; delay?: unknown };
-		const delay = t.delay ? ` ${formatDim(t.delay)}` : "";
-		return `${formatDim(t.duration)} ${t.timingFunction}${delay}`;
+		const delay = v.delay ? ` ${formatDim(v.delay)}` : "";
+		return `${formatDim(v.duration)} ${v.timingFunction}${delay}`;
 	}
 	return JSON.stringify(v);
 }
 
-function formatShadow(v: JsonObject): string {
+function formatShadow(v: ShadowObject): string {
 	const inset = v.inset === true ? "inset " : "";
-	return `${inset}${formatDim(v.offsetX)} ${formatDim(v.offsetY)} ${formatDim(v.blur)} ${formatDim(v.spread)} ${v.color}`;
+	return `${inset}${formatDim(v.offsetX)} ${formatDim(v.offsetY)} ${formatDim(v.blur)} ${formatDim(v.spread)} ${String(v.color)}`;
 }
 
 function formatDim(v: unknown): string {
@@ -65,17 +72,19 @@ export function extractSwatchColor(value: unknown): string | undefined {
 	return undefined;
 }
 
-function isShadowObject(v: unknown): v is JsonObject {
+function isShadowObject(v: unknown): v is ShadowObject {
 	return (
 		isObject(v) && "offsetX" in v && "offsetY" in v && "blur" in v && "spread" in v && "color" in v
 	);
 }
 
-function isBorder(v: JsonObject): boolean {
+function isBorder(v: JsonObject): v is { width: unknown; style: string; color: string } {
 	return "width" in v && "style" in v && "color" in v && !("offsetX" in v);
 }
 
-function isTransition(v: JsonObject): boolean {
+function isTransition(
+	v: JsonObject,
+): v is { duration: unknown; timingFunction: string; delay?: unknown } {
 	return "duration" in v && "timingFunction" in v;
 }
 

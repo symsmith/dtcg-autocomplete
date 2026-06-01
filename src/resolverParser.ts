@@ -20,11 +20,13 @@ interface ResolverFile {
 
 export async function getVariantExclusions(resolverPath: string): Promise<Set<string>> {
 	const raw = await readFile(resolverPath, "utf8");
-	const resolver = JSON.parse(raw) as ResolverFile;
+	const parsed = JSON.parse(raw) as Partial<ResolverFile>;
 	const dir = dirname(resolverPath);
 	const excluded = new Set<string>();
 
-	for (const entry of resolver.resolutionOrder) {
+	if (!Array.isArray(parsed.resolutionOrder)) return excluded;
+
+	for (const entry of parsed.resolutionOrder) {
 		if (entry.type !== "modifier") continue;
 		for (const [context, refs] of Object.entries(entry.contexts)) {
 			if (context === entry.default) continue;

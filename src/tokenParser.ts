@@ -16,9 +16,13 @@ type DtcgNode = {
 	[key: string]: unknown;
 };
 
+function isObject(v: unknown): v is DtcgNode {
+	return typeof v === "object" && v !== null && !Array.isArray(v);
+}
+
 export function parseTokenFile(json: unknown): Map<string, ParsedToken> {
 	const result = new Map<string, ParsedToken>();
-	walk(json as DtcgNode, [], "", result);
+	if (isObject(json)) walk(json, [], "", result);
 	return result;
 }
 
@@ -28,7 +32,7 @@ function walk(
 	inheritedType: string,
 	result: Map<string, ParsedToken>,
 ): void {
-	const type = (node.$type as string | undefined) ?? inheritedType;
+	const type = node.$type ?? inheritedType;
 
 	if ("$value" in node) {
 		const dotPath = path.join(".");
@@ -38,13 +42,15 @@ function walk(
 			type,
 			rawValue: formatTokenValue(node.$value),
 			swatchColor: extractSwatchColor(node.$value),
-			description: node.$description as string | undefined,
+			description: node.$description,
 		});
 		return;
 	}
 
 	for (const key of Object.keys(node)) {
 		if (key.startsWith("$")) continue;
-		walk(node[key] as DtcgNode, [...path, key], type, result);
+		const child = node[key];
+		if (!isObject(child)) continue;
+		walk(child, [...path, key], type, result);
 	}
 }

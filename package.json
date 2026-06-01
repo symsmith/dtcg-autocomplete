@@ -1,7 +1,7 @@
 {
 	"name": "dtcg-autocomplete",
 	"displayName": "DTCG Autocomplete",
-	"version": "1.1.1",
+	"version": "1.1.2",
 	"description": "CSS variable autocomplete and hover for DTCG design token files",
 	"categories": [
 		"Other"
